@@ -1,0 +1,25 @@
+CREATE DATABASE push_down_db;
+
+CREATE USER push_down_user WITH PASSWORD '123456';
+
+GRANT CONNECT ON DATABASE push_down_db TO push_down_user;
+
+\c push_down_db
+
+GRANT USAGE, CREATE ON SCHEMA public TO push_down_user;
+
+GRANT SELECT, INSERT, UPDATE, DELETE
+    ON ALL TABLES IN SCHEMA public
+    TO push_down_user;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+    GRANT SELECT, INSERT, UPDATE, DELETE
+    ON TABLES TO push_down_user;
+
+GRANT USAGE, SELECT, UPDATE
+    ON ALL SEQUENCES IN SCHEMA public
+    TO push_down_user;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+    GRANT USAGE, SELECT, UPDATE
+    ON SEQUENCES TO push_down_user;
