@@ -1,5 +1,9 @@
 package school.hei;
 
+import school.hei.enums.DBConnection;
+import school.hei.enums.Status;
+import school.hei.models.InvoiceStatusTotals;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,26 +17,36 @@ public class DataRetriever {
     public List<InvoiceTotal> findInvoicesTotals() {
         List<InvoiceTotal> result = new ArrayList<>();
         String query = """
-                 SELECT i.id, i.customer_name, SUM(il.quantity * il.unit_price) AS total_invoice
-                 FROM invoice i
-                          INNER JOIN invoice_line il
-                                     ON i.id = il.invoice_id
-                 GROUP BY i.customer_name, i.id
-                 ORDER BY i.id;
+                SELECT
+                    i.id,
+                    i.customer_name,
+                    SUM(il.quantity * il.unit_price) AS total_invoice
+                FROM
+                    invoice i
+                    INNER JOIN invoice_line il ON i.id = il.invoice_id
+                GROUP BY
+                    i.customer_name,
+                    i.id
+                ORDER BY
+                    i.id;
                 \s""";
-        try (Connection c = dbConnection.getConnection()) {
-            PreparedStatement p = c.prepareStatement(query);
-            ResultSet r = p.executeQuery();
+        return getInvoiceTotals(result, query);
+    }
+
+    private List<InvoiceTotal> getInvoiceTotals(List<InvoiceTotal> result, String query) {
+        try (Connection c = dbConnection.getConnection(); PreparedStatement p = c.prepareStatement(query); ResultSet r = p.executeQuery()) {
+
             while (r.next()) {
                 InvoiceTotal i = new InvoiceTotal();
                 i.setId(r.getInt(1));
                 i.setCustomerName(r.getString(2));
-                i.setAmount(r.getDouble(3));
+                i.setStatus(Status.valueOf(r.getString(3)));
+                i.setAmount(r.getDouble(4));
                 result.add(i);
             }
             return result;
         } catch (SQLException ex) {
-            throw new RuntimeException("SQLException: " + ex.getMessage());
+            throw new RuntimeException("Erreur SQL : " + ex.getMessage(), ex);
         }
     }
 
@@ -46,26 +60,11 @@ public class DataRetriever {
                  FROM invoice i
                           INNER JOIN invoice_line il
                                      ON i.id = il.invoice_id
-                 WHERE i.status = 'PAID'
-                    or i.status = 'CONFIRMED'
+                 WHERE i.status IN ('PAID', 'CONFIRMED')
                  GROUP BY i.customer_name, i.id, i.status
                  ORDER BY i.id;
                 \s""";
-        try (Connection c = dbConnection.getConnection()) {
-            PreparedStatement p = c.prepareStatement(query);
-            ResultSet r = p.executeQuery();
-            while (r.next()) {
-                InvoiceTotal i = new InvoiceTotal();
-                i.setId(r.getInt(1));
-                i.setCustomerName(r.getString(2));
-                i.setStatus(Status.valueOf(r.getString(3)));
-                i.setAmount(r.getDouble(4));
-                result.add(i);
-            }
-            return result;
-        } catch (SQLException ex) {
-            throw new RuntimeException("SQLException: " + ex.getMessage());
-        }
+        return getInvoiceTotals(result, query);
     }
 
     public Double getPaidInvoicesTotals() throws SQLException {
@@ -122,10 +121,7 @@ public class DataRetriever {
     }
 
     public Double computeWeightedTurnover() throws SQLException {
-        DataRetriever dr = new DataRetriever();
-        InvoiceStatusTotals t = dr.computeStatusTotals();
-        return (t.getTotal_paid() * (double) (1)) + (t.getTotal_confirmed() * (50 % 100 * 100));
+        InvoiceStatusTotals t = computeStatusTotals();
+        return t.getTotal_paid() + (t.getTotal_confirmed() * 0.5);
     }
 }
-
-

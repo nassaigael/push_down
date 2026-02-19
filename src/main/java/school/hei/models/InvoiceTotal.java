@@ -1,6 +1,6 @@
 package school.hei;
 
-import java.util.Objects;
+import school.hei.enums.Status;
 
 public class InvoiceTotal {
     private int id;
@@ -11,17 +11,10 @@ public class InvoiceTotal {
     public InvoiceTotal() {
     }
 
-    public InvoiceTotal(int id, String customerName, Double amount) {
+    public InvoiceTotal(int id, String customerName, Status status, Double amount) {
         this.id = id;
         this.customerName = customerName;
-        this.amount = amount;
-    }
-
-    public Double getAmount(double amount) {
-        return amount;
-    }
-
-    public void setAmount(Double amount) {
+        this.status = status;
         this.amount = amount;
     }
 
@@ -49,12 +42,17 @@ public class InvoiceTotal {
         this.status = status;
     }
 
+    public Double getAmount() {
+        return amount;
+    }
+
+    public void setAmount(Double amount) {
+        this.amount = amount;
+    }
+
     @Override
     public String toString() {
-        return "InvoiceTotal{" + "id=" + id +
-                ", customerName='" + customerName + '\'' +
-                ", status=" + status +
-                ", amount=" + amount +
-                '}';
+        return String.format("%d | %s | %s | %.2f",
+                id, customerName, status, amount != null ? amount : 0.0);
     }
 }
