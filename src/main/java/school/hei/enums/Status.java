@@ -1,7 +1,7 @@
 package school.hei.enums;
 
 public enum Status {
-    DRAFT,
+    PAID,
     CONFIRMED,
-    PAID
+    DRAFT
 }

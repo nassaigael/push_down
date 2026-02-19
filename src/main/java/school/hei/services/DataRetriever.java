@@ -31,18 +31,14 @@ public class DataRetriever {
                 ORDER BY
                     i.id;
                 \s""";
-        return getInvoiceTotals(result, query);
-    }
 
-    private List<InvoiceTotal> getInvoiceTotals(List<InvoiceTotal> result, String query) {
         try (Connection c = dbConnection.getConnection(); PreparedStatement p = c.prepareStatement(query); ResultSet r = p.executeQuery()) {
 
             while (r.next()) {
                 InvoiceTotal i = new InvoiceTotal();
                 i.setId(r.getInt(1));
                 i.setCustomerName(r.getString(2));
-                i.setStatus(Status.valueOf(r.getString(3)));
-                i.setAmount(r.getDouble(4));
+                i.setAmount(r.getDouble(3));
                 result.add(i);
             }
             return result;
@@ -65,7 +61,20 @@ public class DataRetriever {
                  GROUP BY i.customer_name, i.id, i.status
                  ORDER BY i.id;
                 \s""";
-        return getInvoiceTotals(result, query);
+        try (Connection c = dbConnection.getConnection(); PreparedStatement p = c.prepareStatement(query); ResultSet r = p.executeQuery()) {
+
+            while (r.next()) {
+                InvoiceTotal i = new InvoiceTotal();
+                i.setId(r.getInt(1));
+                i.setCustomerName(r.getString(2));
+                i.setStatus(Status.valueOf(r.getString(3)));
+                i.setAmount(r.getDouble(4));
+                result.add(i);
+            }
+            return result;
+        } catch (SQLException ex) {
+            throw new RuntimeException("Erreur SQL : " + ex.getMessage(), ex);
+        }
     }
 
     public Double getPaidInvoicesTotals() throws SQLException {
