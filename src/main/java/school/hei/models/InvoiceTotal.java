@@ -1,4 +1,4 @@
-package school.hei;
+package school.hei.models;
 
 import school.hei.enums.Status;
 

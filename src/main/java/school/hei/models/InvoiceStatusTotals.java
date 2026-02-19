@@ -1,4 +1,4 @@
-package school.hei;
+package school.hei.models;
 
 public class InvoiceStatusTotals {
     private Double total_paid;

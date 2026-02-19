@@ -1,5 +1,6 @@
-package school.hei;
+package school.hei.services;
 
+import school.hei.models.InvoiceTotal;
 import school.hei.enums.DBConnection;
 import school.hei.enums.Status;
 import school.hei.models.InvoiceStatusTotals;

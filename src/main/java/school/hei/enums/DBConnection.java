@@ -1,4 +1,4 @@
-package school.hei;
+package school.hei.enums;
 
 import java.sql.*;
 
